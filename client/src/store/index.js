@@ -33,7 +33,7 @@ export default new Vuex.Store({
     login({ commit }, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request')
-        axios({ url: `http://localhost:3000/login`, data: user, method: 'POST' })
+        axios({ url: `https://test.ia.h3online.hu/api/login`, data: user, method: 'POST' })
           .then((result) => {
             console.log('t', result)
             const token = result.data.token

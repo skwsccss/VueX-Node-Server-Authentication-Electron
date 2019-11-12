@@ -1,54 +1,58 @@
 <template>
-  <mdb-row style="justify-content: center">
-    <mdb-col sm="6">
-      <mdb-card wide style="margin-top:60px">
-        <mdb-card-body>
-          <form @submit.prevent="register">
-            <p class="h4 text-center mb-4">Sign up</p>
-            <div class="grey-text">
-              <mdb-input v-model="userName" label="Your name" icon="user" type="text" required />
-              <mdb-input v-model="email" label="Your email" icon="envelope" type="email" required />
-              <mdb-input
-                v-model="password"
-                label="Your password"
-                icon="lock"
-                type="password"
-                required
-              />
-              <mdb-input
-                v-model="confirmPassword"
-                label="Confirm your email"
-                icon="exclamation-triangle"
-                type="password"
-                required
-              />
-            </div>
-            <div class="text-center">
-              <mdb-btn color="primary">Register</mdb-btn>
-              <a href="/">Log in</a>
-            </div>
-          </form>
-        </mdb-card-body>
-      </mdb-card>
-    </mdb-col>
-  </mdb-row>
-  <!-- Material form register -->
-
-  <!-- Material form register -->
+  <div>
+    <form @submit.prevent="login" class="login">
+      <div class="content">
+        <div class="md-layout" style="justify-content:center">
+          <div class="md-layout-item md-medium-size-50 md-size-50">
+            <md-card>
+              <md-card-header data-background-color="green">
+                <h4 class="title">User Log in</h4>
+              </md-card-header>
+              <md-card-content>
+                <div class="md-layout">
+                  <div class="md-layout-item md-small-size-100 md-size-100">
+                    <md-field>
+                      <label>User name</label>
+                      <md-input v-model="email" type="userName" required></md-input>
+                    </md-field>
+                  </div>
+                  <div class="md-layout-item md-small-size-100 md-size-100">
+                    <md-field>
+                      <label>Email Address</label>
+                      <md-input v-model="email" type="email" required></md-input>
+                    </md-field>
+                  </div>
+                  <div class="md-layout-item md-small-size-100 md-size-100">
+                    <md-field>
+                      <label>Password</label>
+                      <md-input v-model="ConfirmPassword" type="password" required></md-input>
+                    </md-field>
+                  </div>
+                  <div class="md-layout-item md-small-size-100 md-size-100">
+                    <md-field>
+                      <label>Comfirm Password</label>
+                      <md-input v-model="password" type="password" required></md-input>
+                    </md-field>
+                  </div>
+                  <div class="md-layout-item md-size-100 text-center">
+                    <md-button class="md-raised md-success" type="submit">
+                      register
+                      <i class="material-icons" style="padding-left:3px">exit_to_app</i>
+                    </md-button>
+                  </div>
+                </div>
+              </md-card-content>
+            </md-card>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script>
-import { mdbInput, mdbBtn, mdbRow, mdbCol, mdbCard, mdbCardBody } from "mdbvue";
 export default {
   name: "Register",
-  components: {
-    mdbInput,
-    mdbBtn,
-    mdbRow,
-    mdbCol,
-    mdbCard,
-    mdbCardBody
-  },
   data() {
     return {
       userName: "",
