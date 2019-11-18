@@ -1,4 +1,4 @@
-# electron-vue
+# ev
 
 ## Project setup
 ```

@@ -5,9 +5,7 @@
         <h4>Status :</h4>
       </div>
       <div class="md-layout-item md-small-size-90 md-size-90">
-        <marquee>
-          <h4>The Status will be displayed here!</h4>
-        </marquee>
+          <h4>{{msg}}</h4>
       </div>
     </div>
   </div>
@@ -18,7 +16,10 @@
 
 <script>
 export default {
-  name: "Footer"
+  name: "Footer",
+  props: {
+    msg: String
+  }
 };
 </script>
 

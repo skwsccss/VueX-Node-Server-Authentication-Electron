@@ -1,11 +1,15 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+import request from "request";
+require('dotenv').config()
+let cookie = '';
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -17,6 +21,7 @@ protocol.registerSchemesAsPrivileged([{ scheme: 'app', privileges: { secure: tru
 function createWindow() {
   // Create the browser window.
   win = new BrowserWindow({
+    frame: false,
     width: 1150, height: 700, webPreferences: {
       nodeIntegration: true
     }
@@ -29,7 +34,7 @@ function createWindow() {
   } else {
     createProtocol('app')
     // Load the index.html when not in development
-    win.loadURL('../public/index.html')
+    win.loadURL('app://./index.html')
   }
 
   win.on('closed', () => {
@@ -60,16 +65,11 @@ app.on('activate', () => {
 app.on('ready', async () => {
   if (isDevelopment && !process.env.IS_TEST) {
     // Install Vue Devtools
-    // Devtools extensions are broken in Electron 6.0.0 and greater
-    // See https://github.com/nklayman/vue-cli-plugin-electron-builder/issues/378 for more info
-    // Electron will not launch with Devtools extensions installed on Windows 10 with dark mode
-    // If you are not using Windows 10 dark mode, you may uncomment these lines
-    // In addition, if the linked issue is closed, you can upgrade electron and uncomment these lines
-    // try {
-    //   await installVueDevtools()
-    // } catch (e) {
-    //   console.error('Vue Devtools failed to install:', e.toString())
-    // }
+    try {
+      await installVueDevtools()
+    } catch (e) {
+      console.error('Vue Devtools failed to install:', e.toString())
+    }
 
   }
   createWindow()
@@ -89,3 +89,53 @@ if (isDevelopment) {
     })
   }
 }
+
+ipcMain.on('closeWindow', () => {
+  let SYNC_URL = process.env.SYNC_URL || `http://localhost:8384/`
+  request.get({ url: SYNC_URL }, function (err, res, body) {
+    if (err) {
+      win.webContents.send('close');
+      return;
+    } else {
+      let response = res.headers;
+      if (response['set-cookie']) {
+        cookie = response['set-cookie'][0];
+      }
+      let csrf_token_header = cookie.split('=')[0];
+      let csrf_token = cookie.split('=')[1];
+      let headers = {
+        'Cookie': cookie,
+      }
+      headers['X-' + csrf_token_header] = csrf_token;
+      request.post({ url: `${SYNC_URL}rest/system/shutdown`, headers: headers }, function (err, res, body) {
+        if (err) console.log(err)
+        win.webContents.send('close');
+      })
+    }
+  })
+})
+ipcMain.on('getDeviceId', (event,arg) => {
+  console.log("====",arg)
+  let SYNC_URL = arg
+  // fRt4c73DxM76fs  
+  // hirisov@gmail.com
+  request.get({ url: SYNC_URL }, function (err, res, body) {
+    if (err) console.log('err', err)
+    let response = res.headers;
+    if (response['set-cookie']) {
+      cookie = response['set-cookie'][0];
+    }
+    let csrf_token_header = cookie.split('=')[0];
+    let csrf_token = cookie.split('=')[1];
+    let headers = {
+      'Cookie': cookie,
+    }
+    headers['X-' + csrf_token_header] = csrf_token;
+
+    request.get({ url: `${SYNC_URL}rest/system/config`, headers: headers }, function (err, res, body) {
+      if (err) console.log(err)
+      let deviceID = JSON.parse(body).devices[0].deviceID;
+      win.webContents.send('deviceId', deviceID);
+    })
+  })
+})

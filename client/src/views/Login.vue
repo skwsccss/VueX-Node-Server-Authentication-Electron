@@ -36,13 +36,11 @@
       </div>
     </form>
   </div>
-  <!-- Material form login -->
-  <!-- Material form login -->
 </template>
 
 <script>
 export default {
-  name: "Login",
+  name: "login",
 
   data() {
     return {
@@ -57,10 +55,9 @@ export default {
       this.$store
         .dispatch("login", { email, password })
         .then(res => {
-          console.log("q", res);
           this.$router.push("/home");
           this.$notify({
-            message: `Welcome to <b>"${res.data.user.userName}"</b>`,
+            message: `Welcome to <b>"${res.data.user.name}"</b>`,
             icon: "add_alert",
             horizontalAlign: "right",
             verticalAlign: "top",

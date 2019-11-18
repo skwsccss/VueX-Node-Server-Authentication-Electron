@@ -1,8 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-// import { resolve } from 'dns'
-// import { reject } from 'q'
+import env from '../env'
+// import { ipcRenderer } from "electron";
+
 
 Vue.use(Vuex)
 
@@ -10,14 +11,18 @@ export default new Vuex.Store({
   state: {
     status: '',
     token: localStorage.getItem('token') || '',
+    cookie: '',
     user: {}
   },
   mutations: {
+    rgst(state) {
+      state.status = 'loading'
+    },
     auth_request(state) {
       state.status = 'loading'
     },
     auth_success(state, token, user) {
-      state.status = 'success'
+      state.status = 'loading'
       state.token = token
       state.user = user
     },
@@ -27,15 +32,61 @@ export default new Vuex.Store({
     logout(state) {
       state.status = ''
       state.token = ''
+    },
+    error(state) {
+      state.status = 'error'
+    },
+    success(state) {
+      state.status = 'success'
     }
   },
   actions: {
+    registerDevice({ commit }, deviceId) {
+      commit('rgst');
+      return new Promise((resolve, reject) => {
+        commit('rgst')
+        let deviceID = deviceId.arg
+        let API_URL = env.API_URL;
+        let token = localStorage.getItem('token')
+        axios.defaults.headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type':'application/json'
+        }
+        // console.log('sers', deviceID)
+        // console.log('sers', axios.defaults.headers.Authorization)
+        axios({ url: `${API_URL}register-deviceid`, data: JSON.stringify({ "device_id": deviceID }), method: 'POST' }).then((result) => {
+          // console.log(result)
+          resolve(result)
+        }).catch((err) => {
+          commit('error')
+          reject(err)
+        });
+      })
+    },
+    getProduct({ commit }) {
+      return new Promise((resolve, reject) => {
+        commit('rgst')
+        let token = localStorage.getItem('token')
+        let API_URL = env.API_URL;
+        axios.defaults.headers = {
+          Authorization: `Bearer ${token}`,
+          'Content-Type':'application/json'
+        }
+        axios({ url: `${API_URL}my-products`, method: 'GET' }).then((result) => {
+          commit('success')
+          resolve(result)
+        }).catch((err) => {
+          commit('error')
+          reject(err)
+        });
+      })
+
+    },
     login({ commit }, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request')
         axios({ url: `https://test.ia.h3online.hu/api/login`, data: user, method: 'POST' })
           .then((result) => {
-            console.log('t', result)
             const token = result.data.token
             const user = result.data.user
             localStorage.setItem('token', token)
@@ -43,7 +94,7 @@ export default new Vuex.Store({
             commit('auth_success', token, user)
             resolve(result)
           }).catch((err) => {
-            console.log('e', err)
+            // console.log('e', err)
             commit('auth_error')
             localStorage.removeItem('token')
             reject(err)
@@ -81,6 +132,6 @@ export default new Vuex.Store({
   },
   getters: {
     isLoggedIn: state => !!state.token,
-    authStatus: state => state.status,
+    currentStatus: state => state.status,
   }
 })
